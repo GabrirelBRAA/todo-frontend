@@ -1,62 +1,46 @@
-import { useState, type FormEventHandler, type JSX, } from 'react'
 import './App.css'
 import { FormContainer } from './components/form-container/FormContainer'
+import { LoginForm } from './components/forms/login'
+import { SignUpForm } from './components/forms/signup'
+import { createRootRoute, createRoute, createRouter, Outlet, RouterProvider } from '@tanstack/react-router'
 
-function SpanError({errorString}: {errorString: string}){
-  return <span className='error'>{errorString}</span>
-}
+const rootRoute = createRootRoute({
+  component: () => <Outlet/>
+});
 
-interface SignInFormErrors{
-  username: JSX.Element | null
-  password: JSX.Element | null
-  confirmPassword: JSX.Element | null
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/$',
+  component: () => <FormContainer form={<LoginForm/>} formName='Login'/>
+});
+
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/signup',
+  component: () => <FormContainer form={<SignUpForm/>} formName='Sign up'/>
+});
+
+const dashboardPage = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard',
+  component: () => <>User logged in</>
+})
+
+const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, dashboardPage]);
+
+const router = createRouter({routeTree})
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
 }
 
 function App() {
-
-  const loginForm = <form>
-    <label>Username<input type='text'/></label>
-    <label>Password<input type='password'/></label>
-    <p>Do not have an account?<a> Sign up.</a></p>
-    <button type='submit'>Send</button>
-  </form>
-
-  const [signInFormErrors, setSignInFormErrors] = useState<SignInFormErrors>({password: null, confirmPassword: null, username: null})
-
-
-  const submitSignUpForm: FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault()
-    const form = new FormData(e.currentTarget)
-    const newErrors: SignInFormErrors = {
-      username: null,
-      password: null,
-      confirmPassword: null
-    };
-    if(form.get('username') && form.get('username')!.toString(). length < 4){
-      newErrors.username = <SpanError errorString='*must be bigger than 4 characters'/>
-    }
-    if (form.get('password') && form.get('password')!.toString().length < 8){
-      newErrors.password = <SpanError errorString='*must be bigger than 8 characters.'/>
-    }
-    if (form.get('confirmpassword') && form.get('password') && form.get('confirmpassword')!.toString() != form.get('password')!.toString()){
-      newErrors.confirmPassword = <SpanError errorString='*must match password.'/>
-    }
-    setSignInFormErrors(newErrors);
-  }
-
-  const signUpForm = <form onSubmit={submitSignUpForm}>
-    <label>Username {signInFormErrors.username}<input type='text' name='username'/></label>
-    <label>First name<input type='text'/></label>
-    <label>Second name<input type='text'/></label>
-    <label>Email<input type='email'/></label>
-    <label>Password {signInFormErrors['password']}<input name='password' type='password'/></label>
-    <label>Confirm password {signInFormErrors.confirmPassword}<input name='confirmpassword' type='password'/></label>
-    <button type='submit'>Send</button>
-  </form>
-
-  return (
-    <FormContainer form={signUpForm} formName='Sign up'/>
-  )
+  
+  //implement to check if user is logged in here
+  //if he is logged in redirect him to dashboard, else redirect him to login page
+  return <RouterProvider router={router}/>
 }
 
 export default App
