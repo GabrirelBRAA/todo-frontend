@@ -2,7 +2,10 @@ import './App.css'
 import { FormContainer } from './components/form-container/FormContainer'
 import { LoginForm } from './components/forms/login'
 import { SignUpForm } from './components/forms/signup'
-import { createRootRoute, createRoute, createRouter, Outlet, RouterProvider } from '@tanstack/react-router'
+import { createRootRoute, createRoute, createRouter, Outlet, redirect, RouterProvider } from '@tanstack/react-router'
+import { AuthProvider } from './components/auth-provider/auth-provider'
+import { userService } from './services/userService'
+
 
 const rootRoute = createRootRoute({
   component: () => <Outlet/>
@@ -23,7 +26,14 @@ const aboutRoute = createRoute({
 const dashboardPage = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard',
-  component: () => <>User logged in</>
+  component: () => <>User logged in<Outlet/></>,
+  beforeLoad: () => {
+    if (userService.isAuthenticated() == null){
+      throw redirect({
+        to: '/signup',
+      })
+    }
+  }
 })
 
 const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, dashboardPage]);
@@ -40,7 +50,7 @@ function App() {
   
   //implement to check if user is logged in here
   //if he is logged in redirect him to dashboard, else redirect him to login page
-  return <RouterProvider router={router}/>
+  return <AuthProvider><RouterProvider router={router}/></AuthProvider>
 }
 
 export default App

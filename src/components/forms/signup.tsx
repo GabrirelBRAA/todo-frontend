@@ -41,7 +41,7 @@ export function SignUpForm(){
     <label>Email<input type='email'/></label>
     <label>Password {signUpFormErrors['password']}<input name='password' type='password'/></label>
     <label>Confirm password {signUpFormErrors.confirmPassword}<input name='confirmpassword' type='password'/></label>
-    <p>Already have an account?<Link to="/login"> Login.</Link></p>
+    <p>Already have an account?<Link to="/"> Login.</Link></p>
     <button type='submit'>Send</button>
   </form>
 }
