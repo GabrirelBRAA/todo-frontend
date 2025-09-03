@@ -5,6 +5,7 @@ import { SignUpForm } from './components/forms/signup'
 import { createRootRoute, createRoute, createRouter, Outlet, redirect, RouterProvider } from '@tanstack/react-router'
 import { AuthProvider } from './components/auth-provider/auth-provider'
 import { userService } from './services/userService'
+import { MainApp } from './components/main-screen/MainScreen'
 
 
 const rootRoute = createRootRoute({
@@ -26,7 +27,7 @@ const aboutRoute = createRoute({
 const dashboardPage = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard',
-  component: () => <>User logged in<Outlet/></>,
+  component: () => <MainApp/>,
   beforeLoad: () => {
     if (userService.isAuthenticated() == null){
       throw redirect({

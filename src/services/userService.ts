@@ -45,6 +45,10 @@ class UserService {
 		return result;
 	}
 
+	async logoff(){
+
+	}
+
 	signup() {}
 
 	isAuthenticated() {
