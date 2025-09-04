@@ -10,5 +10,10 @@ export interface User {
 	role?: "NORMAL" | "ADMIN" | "SUPERADMIN";
 }
 
-export const UserContext = createContext<User>({is_authenticated: null})
+export interface UserContextType {
+    user: User;
+    refreshUser: () => Promise<void>
+}
+
+export const UserContext = createContext<UserContextType>({user: {is_authenticated: null}, refreshUser: async () => {}})
 

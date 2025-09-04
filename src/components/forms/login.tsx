@@ -1,7 +1,8 @@
-import { type JSX, useState, type FormEventHandler } from "react";
-import { Link, redirect } from "@tanstack/react-router";
+import { type JSX, useState, type FormEventHandler, useContext } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { SpanError } from "./spanerror";
 import { userService } from "../../services/userService";
+import { UserContext } from "../../context/userContext";
 
 interface LoginFormErrors {
 	username: JSX.Element | null;
@@ -9,6 +10,8 @@ interface LoginFormErrors {
 	backend: JSX.Element | null;
 }
 export function LoginForm() {
+    const { refreshUser } = useContext(UserContext)
+    const navigate = useNavigate({from: '/$'})
 	const [loginFormErrors, setLoginFormErrors] = useState<LoginFormErrors>({
 		password: null,
 		username: null,
@@ -40,7 +43,8 @@ export function LoginForm() {
 					form.get("username")!.toString(),
 					form.get("password")!.toString()
 				); //this is also not ideal
-                throw redirect({to: '/dashboard'})
+                await refreshUser!()
+                navigate({to: '/dashboard'})
 			} catch (e: unknown) {
 				if (e instanceof Error) {
 					newErrors.backend = <SpanError errorString={'*' + e.message} />;
