@@ -46,7 +46,15 @@ class UserService {
 	}
 
 	async logoff(){
-
+		const url = `${this.url}/logoff`;
+		const response = await fetch(url, {
+			method: "POST",
+            credentials: 'include',
+		});
+		if (!response.ok) {
+			//important that fast api sends error at detail, if I ever change this it might create a bug
+			throw new Error("Failed to logoff");
+		}
 	}
 
 	signup() {}
