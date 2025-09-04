@@ -26,7 +26,7 @@ class ItemService {
 		return result;
     }
 
-	async list(page: number = 0, limit: number = 10): Promise<[Item]> {
+	async list(page: number = 0, limit: number = 10): Promise<{items: Item[], total_count: number}> {
         const search_params = new URLSearchParams({
             page: page.toString(),
             limit: limit.toString()

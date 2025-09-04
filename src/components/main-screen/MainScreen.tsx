@@ -17,6 +17,7 @@ function Item({item}: {item: Item}) {
 	);
 }
 
+//just a test function that helps with slowing down queries
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -24,11 +25,13 @@ function timeout(ms) {
 export function MainApp() {
 
     const [items, setItems] = useState<Array<Item>>([])
+    const [totalCount, setTotalCount] = useState<number>(0)
 
     async function getItems(){
         const items = await itemService.list(0, 12)
         await timeout(1000)
-        setItems(items)
+        setItems(items.items)
+        setTotalCount(items.total_count)
         console.log(items)
     }
 
@@ -47,7 +50,7 @@ export function MainApp() {
                     {itemsComponents}
 
 				</div>
-                <div>Pagination</div>
+                <div>Pagination {totalCount}</div>
 			</div>
 		</>
 	);
