@@ -1,8 +1,9 @@
 import { Nav } from "../nav/Nav";
 import styles from "./style.module.css";
 import { itemService, type Item } from "../../services/itemService";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEventHandler, type JSX } from "react";
 import { LoaderCircle } from "../loader/LoaderCircle";
+import { SpanError } from "../forms/spanerror";
 // top nav
 // add button
 // dialog to create item
@@ -18,19 +19,67 @@ function Item({ item }: { item: Item }) {
 	);
 }
 
-function Modal({open, closeModal} : {open: boolean, closeModal: () => void}) {
+interface CreateItemFormErrors {
+    title: null | JSX.Element 
+    description: null | JSX.Element
+    backend: null | JSX.Element 
+}
+
+function Modal({open, closeModal, refreshState} : {open: boolean, closeModal: () => void, refreshState: () => void}) {
+    const [formErrors, setFormErrors] = useState<CreateItemFormErrors>();
+
+	const submitCreateItemForm: FormEventHandler<HTMLFormElement> = async (e) => {
+		e.preventDefault();
+		const form = new FormData(e.currentTarget);
+		const newErrors: CreateItemFormErrors = {
+			title: null,
+			description: null,
+            backend: null,
+		};
+		if (!form.get("title")) {
+			newErrors.title = (
+				<SpanError errorString="*required" />
+			);
+		}
+		if (!form.get("description")) {
+			newErrors.description = (
+				<SpanError errorString="*required" />
+			);
+		}
+		if (newErrors.title == null && newErrors.description == null) {
+			//create item
+			try {
+                await itemService.create({title: form.get('title')!.toString(), description: form.get('description')!.toString()})
+                closeModal()
+                await refreshState()
+                e.currentTarget.reset() //reseting form
+			} catch (e: unknown) {
+				if (e instanceof Error) {
+                    //Need to put the backend errors somewhere on the UI
+					newErrors.backend = <SpanError errorString={'*' + e.message} />;
+					setFormErrors(newErrors);
+                    console.log(newErrors)
+				}
+			}
+		} else {
+            setFormErrors(newErrors)
+        }
+	};
+
 	return (
 		<>
 			{open ? (<div className={styles.modaloverlay}></div>) : null}
 			<dialog open={open} className={styles.modal}>
 				<h2>Create new item</h2>
 				<button className={styles.closebutton} onClick={closeModal}>X</button>
-				<form>
+				<form onSubmit={submitCreateItemForm}>
 					<label>
-						<input type="text" placeholder="Title" />
+                        {formErrors?.title}
+						<input type="text" name="title" placeholder="Title" />
 					</label>
 					<label>
-						<textarea />
+                        {formErrors?.description}
+						<textarea name="description" />
 					</label>
 					<button type="submit">Save</button>
 				</form>
@@ -78,9 +127,8 @@ export function MainApp() {
 			<Nav />
 			<div className={styles.container}>
 			    <button className={styles.addbutton} onClick={openModal}>New</button>
-				<Modal open={modalOpen} closeModal={closeModal}/>
-				{itemsComponents.length > 0 ? <div className={styles.listcontainer}>{itemsComponents}</div> : (<LoaderCircle/>)}
-				<div>Pagination {totalCount}</div>
+				<Modal open={modalOpen} closeModal={closeModal} refreshState={getItems}/>
+				{itemsComponents.length > 0 ? (<><div className={styles.listcontainer}>{itemsComponents}</div><div>Pagination {totalCount}</div></>) : (<LoaderCircle/>)}
 			</div>
 		</>
 	);
