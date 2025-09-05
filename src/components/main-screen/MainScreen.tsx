@@ -2,6 +2,7 @@ import { Nav } from "../nav/Nav";
 import styles from "./style.module.css";
 import { itemService, type Item } from "../../services/itemService";
 import { useEffect, useState } from "react";
+import { LoaderCircle } from "../loader/LoaderCircle";
 // top nav
 // add button
 // dialog to create item
@@ -78,7 +79,7 @@ export function MainApp() {
 			<div className={styles.container}>
 			    <button className={styles.addbutton} onClick={openModal}>New</button>
 				<Modal open={modalOpen} closeModal={closeModal}/>
-				<div className={styles.listcontainer}>{itemsComponents}</div>
+				{itemsComponents.length > 0 ? <div className={styles.listcontainer}>{itemsComponents}</div> : (<LoaderCircle/>)}
 				<div>Pagination {totalCount}</div>
 			</div>
 		</>
