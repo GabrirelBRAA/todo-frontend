@@ -5,9 +5,11 @@
     align-items: center;
     background-color: rgb(128, 24, 173);
     background-color: rgb(53, 22, 84);
+    background-color: rgb(248, 247, 247);
+    border-bottom: solid rgb(223, 223, 223) 1px;
     height: 100px;
     width: auto;
-    box-shadow: 0px 3px 3px #221e39;
+    /*box-shadow: 0px 3px 3px #221e39;*/
 }
 
 @media (max-width: 1000px) {
@@ -18,9 +20,11 @@
     height: 50px;
     width: 100vw;
     justify-content: center;
+    border-top: solid rgb(223, 223, 223) 1px;
    } 
 }
 
 .logoff{
-    background-color: rgb(214, 49, 49);
+    background-color: rgb(227, 138, 138);
+    border: solid 1px rgb(230, 34, 34);
 }
