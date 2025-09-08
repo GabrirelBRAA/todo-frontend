@@ -20,6 +20,8 @@
     cursor: pointer;
     border: solid 1px rgb(208, 208, 238);
     border-radius: 15px;
+    font-weight: 300;
+    font-size: small;
 }
 
 .item:hover{
@@ -34,6 +36,8 @@
     background-color: hsl(222, 100%, 90%);
     border-radius: 14px 14px 0px 0px;
     padding: auto;
+    font-weight: bold;
+    font-size:medium;
 }
 
 @media (max-width: 1000px){
