@@ -20,69 +20,91 @@ function Item({ item }: { item: Item }) {
 }
 
 interface CreateItemFormErrors {
-    title: null | JSX.Element 
-    description: null | JSX.Element
-    backend: null | JSX.Element 
+	title: null | JSX.Element;
+	description: null | JSX.Element;
+	backend: null | JSX.Element;
 }
 
-function Modal({open, closeModal, refreshState} : {open: boolean, closeModal: () => void, refreshState: () => void}) {
-    const [formErrors, setFormErrors] = useState<CreateItemFormErrors>();
+function CreateItemForm({
+	closeModal,
+	refreshState,
+}: {
+	closeModal: () => void;
+	refreshState: () => void;
+}) {
+	const [formErrors, setFormErrors] = useState<CreateItemFormErrors>();
 
 	const submitCreateItemForm: FormEventHandler<HTMLFormElement> = async (e) => {
 		e.preventDefault();
+        const currentTarget = e.currentTarget;
 		const form = new FormData(e.currentTarget);
 		const newErrors: CreateItemFormErrors = {
 			title: null,
 			description: null,
-            backend: null,
+			backend: null,
 		};
 		if (!form.get("title")) {
-			newErrors.title = (
-				<SpanError errorString="*required" />
-			);
+			newErrors.title = <SpanError errorString="*required" />;
 		}
 		if (!form.get("description")) {
-			newErrors.description = (
-				<SpanError errorString="*required" />
-			);
+			newErrors.description = <SpanError errorString="*required" />;
 		}
 		if (newErrors.title == null && newErrors.description == null) {
 			//create item
 			try {
-                await itemService.create({title: form.get('title')!.toString(), description: form.get('description')!.toString()})
-                closeModal()
-                await refreshState()
-                e.currentTarget.reset() //reseting form
+				await itemService.create({
+					title: form.get("title")!.toString(),
+					description: form.get("description")!.toString(),
+				});
+				closeModal();
+				await refreshState();
+				currentTarget.reset(); //reseting form
 			} catch (e: unknown) {
 				if (e instanceof Error) {
-                    //Need to put the backend errors somewhere on the UI
-					newErrors.backend = <SpanError errorString={'*' + e.message} />;
+					//Need to put the backend errors somewhere on the UI
+					newErrors.backend = <SpanError errorString={"*" + e.message} />;
 					setFormErrors(newErrors);
-                    console.log(newErrors)
 				}
 			}
 		} else {
-            setFormErrors(newErrors)
-        }
+			setFormErrors(newErrors);
+		}
 	};
 
 	return (
+		<form onSubmit={submitCreateItemForm}>
+			<label>
+				{formErrors?.title}
+				<input type="text" name="title" placeholder="Title" />
+			</label>
+			<label>
+				{formErrors?.description}
+				<textarea name="description" />
+			</label>
+			<button type="submit">Save</button>
+		</form>
+	);
+}
+
+function Modal({
+	open,
+    form,
+	closeModal,
+}: {
+	open: boolean;
+    form: JSX.Element
+	closeModal: () => void;
+	refreshState: () => void;
+}) {
+	return (
 		<>
-			{open ? (<div className={styles.modaloverlay}></div>) : null}
+			{open ? <div className={styles.modaloverlay}></div> : null}
 			<dialog open={open} className={styles.modal}>
 				<h2>Create new item</h2>
-				<button className={styles.closebutton} onClick={closeModal}>X</button>
-				<form onSubmit={submitCreateItemForm}>
-					<label>
-                        {formErrors?.title}
-						<input type="text" name="title" placeholder="Title" />
-					</label>
-					<label>
-                        {formErrors?.description}
-						<textarea name="description" />
-					</label>
-					<button type="submit">Save</button>
-				</form>
+				<button className={styles.closebutton} onClick={closeModal}>
+					X
+				</button>
+                {form}
 			</dialog>
 		</>
 	);
@@ -96,15 +118,15 @@ function timeout(ms) {
 export function MainApp() {
 	const [items, setItems] = useState<Array<Item>>([]);
 	const [totalCount, setTotalCount] = useState<number>(0);
-    const [modalOpen, setModalOpen] = useState(false)
+	const [modalOpen, setModalOpen] = useState(false);
 
-    const closeModal = () => {
-        setModalOpen(false)
-    }
+	const closeModal = () => {
+		setModalOpen(false);
+	};
 
-    const openModal = () => {
-        setModalOpen(true)
-    }
+	const openModal = () => {
+		setModalOpen(true);
+	};
 
 	async function getItems() {
 		const items = await itemService.list(0, 12);
@@ -126,9 +148,23 @@ export function MainApp() {
 		<>
 			<Nav />
 			<div className={styles.container}>
-			    <button className={styles.addbutton} onClick={openModal}>New</button>
-				<Modal open={modalOpen} closeModal={closeModal} refreshState={getItems}/>
-				{itemsComponents.length > 0 ? (<><div className={styles.listcontainer}>{itemsComponents}</div><div>Pagination {totalCount}</div></>) : (<LoaderCircle/>)}
+				<button className={styles.addbutton} onClick={openModal}>
+					New
+				</button>
+				<Modal
+					open={modalOpen}
+                    form={<CreateItemForm refreshState={getItems} closeModal={closeModal}/>}
+					closeModal={closeModal}
+					refreshState={getItems}
+				/>
+				{itemsComponents.length > 0 ? (
+					<>
+						<div className={styles.listcontainer}>{itemsComponents}</div>
+						<div>Pagination {totalCount}</div>
+					</>
+				) : (
+					<LoaderCircle />
+				)}
 			</div>
 		</>
 	);
