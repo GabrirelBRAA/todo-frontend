@@ -82,6 +82,7 @@
     border: none;
     border-radius: 15px;
     background-color: rgb(124, 9, 232);
+    background-color: white;
 }
 
 /*This is kinda of a hack and sucks a bit to do*/
@@ -101,10 +102,11 @@
     width: 40px;
     border-radius: 50%;
     border: solid rgb(82, 7, 153) 1px;
+    border: solid rgb(208, 208, 238) 1px;
 }
 
 .closebutton:hover{
-    background-color: rgb(47, 5, 87);
-    border: solid rgb(255, 0, 234) 1px;
-    color: rgb(255, 0, 234);
+    background-color: rgb(255, 255, 255);
+    border: solid red 1px;
+    color: red;
 }
