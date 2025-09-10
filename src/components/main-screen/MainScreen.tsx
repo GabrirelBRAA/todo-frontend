@@ -90,17 +90,19 @@ function Modal({
 	open,
     form,
 	closeModal,
+    title
 }: {
 	open: boolean;
     form: JSX.Element
 	closeModal: () => void;
 	refreshState: () => void;
+    title: string
 }) {
 	return (
 		<>
 			{open ? <div className={styles.modaloverlay}></div> : null}
 			<dialog open={open} className={styles.modal}>
-				<h2>Create new item</h2>
+				<h2>{title}</h2>
 				<button className={styles.closebutton} onClick={closeModal}>
 					X
 				</button>
@@ -156,6 +158,7 @@ export function MainApp() {
                     form={<CreateItemForm refreshState={getItems} closeModal={closeModal}/>}
 					closeModal={closeModal}
 					refreshState={getItems}
+                    title={"Create new item"}
 				/>
 				{itemsComponents.length > 0 ? (
 					<>
