@@ -110,3 +110,20 @@
     border: solid red 1px;
     color: red;
 }
+
+.deletebutton{
+    background-color: red;
+    position: absolute;
+    right: 10px;
+    background-color: transparent;
+    color: red;
+    text-decoration: underline;
+    border: none;
+}
+
+.deletebutton:hover{
+    color: rgb(120, 1, 1);
+    background-color: transparent;
+    outline: none;
+    border: none;
+}
