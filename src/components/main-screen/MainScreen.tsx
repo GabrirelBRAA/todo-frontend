@@ -1,7 +1,7 @@
 import { Nav } from "../nav/Nav";
 import styles from "./style.module.css";
 import { itemService, type Item } from "../../services/itemService";
-import { useEffect, useState, type FormEventHandler, type JSX, useRef } from "react";
+import { useEffect, useState, type FormEventHandler, type JSX, useRef, type MouseEventHandler } from "react";
 import { LoaderCircle } from "../loader/LoaderCircle";
 import { SpanError } from "../forms/spanerror";
 // top nav
@@ -91,6 +91,14 @@ function CreateItemForm({
 	);
 }
 
+function ConfirmDelete({open, close, action}: {open: boolean, close: MouseEventHandler, action: () => void}){
+    return <dialog className={styles.confirmmodal} open={open}>
+        <h2>Are you sure you want to delete this?</h2>
+        <button onClick={close}>Yes</button>
+        <button onClick={close}>No</button>
+    </dialog>
+}
+
 const useEditForm = (openModal: () => void) => {
     const form = useRef<HTMLFormElement>(null)
     const updateForm = (title: string, description: string, id: string) => {
@@ -112,6 +120,20 @@ interface EditItemFormErrors {
 
 function EditItemForm({formRef}: {formRef: React.RefObject<HTMLFormElement | null>}){
 	const [formErrors, setFormErrors] = useState<EditItemFormErrors>();
+    const [openConfirmDelete, setOpenConfirmDelete] = useState(false)
+
+    const closeModal: MouseEventHandler = (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setOpenConfirmDelete(false)
+    }
+
+    const openModal: MouseEventHandler = (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setOpenConfirmDelete(true)
+    }
+
     const submitEditItemForm = () => {}
 	return (
 		<form ref={formRef} onSubmit={submitEditItemForm}>
@@ -126,7 +148,8 @@ function EditItemForm({formRef}: {formRef: React.RefObject<HTMLFormElement | nul
 			</label>
             <div>
 			    <button type="submit">Save</button>
-			    <button className={styles.deletebutton} type="submit">Delete</button>
+			    <button className={styles.deletebutton} onClick={openModal}>Delete</button>
+                <ConfirmDelete open={openConfirmDelete} close={closeModal}/>
             </div>
 		</form>
 	);
