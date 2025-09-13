@@ -31,6 +31,9 @@
     border: solid 1px rgb(0, 53, 0);
 }
 
+.item:hover .itemheader{
+    font-size: large;
+}
 
 .itemheader{
     height: 2rem;
@@ -43,6 +46,7 @@
     font-size:medium;
     overflow-x: hidden;
     overflow-y: hidden;
+    transition: all 100ms;
 }
 
 @media (max-width: 1000px){
