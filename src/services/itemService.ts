@@ -29,6 +29,22 @@ class ItemService {
 		return result;
     }
 
+	async update(item: Item) {
+		const url = `${this.url}/items/${item.id}`;
+		const response = await fetch(url, {
+			method: "PUT",
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+			body: JSON.stringify(item),
+		});
+		if (!response.ok) {
+		const result = await response.json();
+			throw new Error(result["detail"]);
+		}
+    }
+
 	async list(page: number = 0, limit: number = 10): Promise<{items: Item[], total_count: number}> {
         const search_params = new URLSearchParams({
             page: page.toString(),

@@ -203,7 +203,43 @@ function EditItemForm({
 		setOpenConfirmDelete(false);
 	};
 
-	const submitEditItemForm = () => {};
+	const submitEditItemForm: FormEventHandler<HTMLFormElement> = async (e) => {
+		e.preventDefault();
+		const form = new FormData(e.currentTarget);
+		const newErrors: CreateItemFormErrors = {
+			title: null,
+			description: null,
+			backend: null,
+		};
+		if (!form.get("title")) {
+			newErrors.title = <SpanError errorString="*required" />;
+		}
+		if (!form.get("description")) {
+			newErrors.description = <SpanError errorString="*required" />;
+		}
+		if (newErrors.title == null && newErrors.description == null) {
+			//create item
+			try {
+				await itemService.update({
+					id: form.get("id")!.toString(),
+					title: form.get("title")!.toString(),
+					description: form.get("description")!.toString(),
+				});
+				closeOuterModal();
+                setOpenConfirmDelete(false)
+				await refreshState();
+				setFormErrors(newErrors);
+			} catch (e: unknown) {
+				if (e instanceof Error) {
+					//Need to put the backend errors somewhere on the UI
+					newErrors.backend = <SpanError errorString={"*" + e.message} />;
+					setFormErrors(newErrors);
+				}
+			}
+		} else {
+			setFormErrors(newErrors);
+		}
+	};
 	return (
 		<form ref={formRef} onSubmit={submitEditItemForm}>
 			<input type="hidden" name="id" />
