@@ -44,6 +44,18 @@ class ItemService {
 		}
 		return result;
     }
+
+    async delete(id: string){
+		const url = `${this.url}/items/${id}`
+		const response = await fetch(url, {
+            credentials: 'include',
+            method: 'DELETE'
+		});
+		if (!response.ok) {
+		    const result = await response.json();
+			throw new Error(result['detail']);
+		}
+    }
 }
 
 export const itemService = new ItemService("http://127.0.0.1:8000")

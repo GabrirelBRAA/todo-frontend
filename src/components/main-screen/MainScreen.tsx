@@ -64,6 +64,7 @@ function CreateItemForm({
 				closeModal();
 				await refreshState();
 				currentTarget.reset(); //reseting form
+			    setFormErrors(newErrors);
 			} catch (e: unknown) {
 				if (e instanceof Error) {
 					//Need to put the backend errors somewhere on the UI
@@ -91,10 +92,10 @@ function CreateItemForm({
 	);
 }
 
-function ConfirmDelete({open, close, action}: {open: boolean, close: MouseEventHandler, action: () => void}){
+function ConfirmDelete({open, close, action}: {open: boolean, close: MouseEventHandler, action: MouseEventHandler}){
     return <dialog className={styles.confirmmodal} open={open}>
         <h2>Are you sure you want to delete this?</h2>
-        <button onClick={close}>Yes</button>
+        <button onClick={action}>Yes</button>
         <button onClick={close}>No</button>
     </dialog>
 }
@@ -118,7 +119,7 @@ interface EditItemFormErrors {
 	backend: null | JSX.Element;
 }
 
-function EditItemForm({formRef}: {formRef: React.RefObject<HTMLFormElement | null>}){
+function EditItemForm({formRef, refreshState, closeOuterModal}: {formRef: React.RefObject<HTMLFormElement | null>, refreshState: () => void, closeOuterModal: () => void}){
 	const [formErrors, setFormErrors] = useState<EditItemFormErrors>();
     const [openConfirmDelete, setOpenConfirmDelete] = useState(false)
 
@@ -132,6 +133,16 @@ function EditItemForm({formRef}: {formRef: React.RefObject<HTMLFormElement | nul
         e.preventDefault()
         e.stopPropagation()
         setOpenConfirmDelete(true)
+    }
+
+    const handleDelete: MouseEventHandler = async (e) => {
+        e.stopPropagation()
+        e.preventDefault()
+        const form = new FormData(formRef.current!); //previous added ref is being used here
+        await itemService.delete(form.get('id')!.toString());
+        await refreshState()
+        closeOuterModal()
+        setOpenConfirmDelete(false)
     }
 
     const submitEditItemForm = () => {}
@@ -149,7 +160,7 @@ function EditItemForm({formRef}: {formRef: React.RefObject<HTMLFormElement | nul
             <div>
 			    <button type="submit">Save</button>
 			    <button className={styles.deletebutton} onClick={openModal}>Delete</button>
-                <ConfirmDelete open={openConfirmDelete} close={closeModal}/>
+                <ConfirmDelete open={openConfirmDelete} close={closeModal} action={handleDelete}/>
             </div>
 		</form>
 	);
@@ -234,7 +245,7 @@ export function MainApp() {
 				</button>
                 <Modal
                 open={editModalOpen}
-                form={<EditItemForm formRef={form}/>}
+                form={<EditItemForm formRef={form} closeOuterModal={closeEditModal} refreshState={getItems}/>}
                 closeModal={closeEditModal}
                 title={"Edit item"}
                 />
