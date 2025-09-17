@@ -297,7 +297,7 @@ function timeout(ms) {
 }
 
 export function MainApp() {
-	const [items, setItems] = useState<Array<Item>>([]);
+	const [items, setItems] = useState<Array<Item> | null>(null);
 	const [totalCount, setTotalCount] = useState<number>(0);
 	const [modalOpen, setModalOpen] = useState(false);
 	const [editModalOpen, setEditModalOpen] = useState(false);
@@ -332,9 +332,20 @@ export function MainApp() {
 		getItems();
 	}, []);
 
-	const itemsComponents = items.map((item, index) => (
-		<Item key={index} item={item} updateEditForm={updateForm} />
-	));
+    let itemsComponents;
+    if (items == null){
+        itemsComponents = <LoaderCircle/>
+    } else if (items.length == 0){
+        itemsComponents = "You have no items, start by creating a new one."
+    } else { 
+        itemsComponents = items.map((item, index) => (
+            <Item key={index} item={item} updateEditForm={updateForm} />
+        ));
+        itemsComponents =  <>
+						<div className={styles.listcontainer}>{itemsComponents}</div>
+						<div>Pagination {totalCount}</div>
+					</>
+    }
 
 	return (
 		<>
@@ -363,14 +374,7 @@ export function MainApp() {
 					closeModal={closeModal}
 					title={"Create new item"}
 				/>
-				{itemsComponents.length > 0 ? (
-					<>
-						<div className={styles.listcontainer}>{itemsComponents}</div>
-						<div>Pagination {totalCount}</div>
-					</>
-				) : (
-					<LoaderCircle />
-				)}
+                {itemsComponents}
 			</div>
 		</>
 	);
