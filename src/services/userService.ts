@@ -1,5 +1,14 @@
 import { type User } from "../context/userContext";
 
+export interface UserAccountCreationData{
+	username: string,
+	password: string,
+	email: string,
+	firstname: string,
+	lastname: string,
+	role: 0
+}
+
 class UserService {
 	private url: string;
 	private currentUser: User = { is_authenticated: null };
@@ -57,7 +66,21 @@ class UserService {
 		}
 	}
 
-	signup() {}
+	async signup(userData: UserAccountCreationData) {
+		const url = `${this.url}/users`;
+		const response = await fetch(url, {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(userData)
+		});
+		if (!response.ok) {
+			//important that fast api sends error at detail, if I ever change this it might create a bug
+			const result = await response.json()
+			throw new Error(result['detail']);
+		}
+	}
 
 	isAuthenticated() {
 		return this.currentUser.is_authenticated;
