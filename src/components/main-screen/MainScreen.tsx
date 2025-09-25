@@ -296,11 +296,64 @@ function timeout(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function usePagination(totalCount: number, currentPage: number){
+    const totalPages = Math.ceil(totalCount/12);
+    currentPage += 1;
+    const outPagesLink = [currentPage];
+
+    let linkCount = 4;
+    while(linkCount > 0){
+        let stillRightSpace = false;
+        let stillLeftSpace = false;
+        if(outPagesLink.at(-1) != totalPages){
+            outPagesLink.push(outPagesLink[outPagesLink.length - 1] + 1);
+            linkCount -= 1;
+            stillRightSpace = true;
+        }
+        if(outPagesLink[0] != 1){
+            outPagesLink.unshift(outPagesLink[0] - 1);
+            linkCount -= 1;
+            stillLeftSpace = true
+        }
+        if (!stillRightSpace && !stillLeftSpace){
+            break;
+        }
+        console.log(outPagesLink)
+    }
+
+    let arrowLeft = null;
+    let arrowRight = null;
+    if(outPagesLink[outPagesLink.length - 1] != currentPage){
+        arrowRight = currentPage + 1;
+        if(outPagesLink[outPagesLink.length - 1] != totalPages){
+            if(outPagesLink[outPagesLink.length - 1] != totalPages - 1){
+                outPagesLink.push(-1);
+            }
+            outPagesLink.push(totalPages);
+        }
+       
+    }
+    if(outPagesLink[0] != currentPage){
+        arrowLeft = currentPage - 1;
+        if(outPagesLink[0] != 1){
+            if(outPagesLink[0] != 2){
+                outPagesLink.unshift(-1);
+            }
+            outPagesLink.unshift(1);
+        }
+    }
+    console.log(outPagesLink)
+
+    return [outPagesLink, arrowLeft, arrowRight] as const
+}
+
 export function MainApp() {
-	const [items, setItems] = useState<Array<Item> | null>(null);
+	const [paginatedItems, setPaginatedItems] = useState<Map<number, Item[]>>(new Map());
 	const [totalCount, setTotalCount] = useState<number>(0);
 	const [modalOpen, setModalOpen] = useState(false);
 	const [editModalOpen, setEditModalOpen] = useState(false);
+    const [paginationIndex, setPaginationIndex] = useState(0);
+    const [outPagesLink, arrowLeft, arrowRight] = usePagination(totalCount, paginationIndex);
 
 	const closeEditModal = () => {
 		setEditModalOpen(false);
@@ -320,30 +373,60 @@ export function MainApp() {
 		setModalOpen(true);
 	};
 
-	async function getItems() {
-		const items = await itemService.list(0, 12);
+    const clearCacheDelete = (paginationIndex: number) => {
+        const newMap = new Map(paginatedItems);
+        for(const key of newMap.keys()){
+            if (key >= paginationIndex){
+                newMap.delete(key);
+            }
+        }
+        setPaginatedItems(newMap)
+        getItems(paginationIndex);
+    }
+
+	async function getItems(paginationIndex: number) {
+		const items = await itemService.list(paginationIndex, 12);
 		await timeout(1000);
-		setItems(items.items);
+        const newMap = new Map<number, Item[]>(paginatedItems);
+        newMap.set(paginationIndex, items.items)
+		setPaginatedItems(newMap);
 		setTotalCount(items.total_count);
 		console.log(items);
 	}
+    for(const key of paginatedItems.keys()){
+        console.log('key', key)
+        if (key >= paginationIndex){
+            console.log("Bigger")
+        }
+    }
 
 	useEffect(() => {
-		getItems();
-	}, []);
+        if (!paginatedItems.has(paginationIndex)){
+		getItems(paginationIndex);
+        }
+	}, [paginationIndex, paginatedItems]);
 
+    //Todo refactor this logic because its ugly
     let itemsComponents;
-    if (items == null){
+    const items = paginatedItems.get(paginationIndex)
+    if (items == undefined){
         itemsComponents = <LoaderCircle/>
     } else if (items.length == 0){
         itemsComponents = "You have no items, start by creating a new one."
     } else { 
+        console.log(outPagesLink)
+        const paginatedLinks = outPagesLink!.map((i, index) => {
+            if (i == -1){
+                return <button className={styles.paginationbutton} key={index}>{"..."}</button>
+            }
+            return <button className={styles.paginationbutton} style={i - 1 == paginationIndex ? {backgroundColor: "green"} : undefined} key={index} onClick={() => setPaginationIndex(i - 1)}>{i}</button>
+    })
         itemsComponents = items.map((item, index) => (
             <Item key={index} item={item} updateEditForm={updateForm} />
         ));
         itemsComponents =  <>
 						<div className={styles.listcontainer}>{itemsComponents}</div>
-						<div>Pagination {totalCount}</div>
+						<div>{paginatedLinks}</div>
 					</>
     }
 
@@ -360,7 +443,7 @@ export function MainApp() {
 						<EditItemForm
 							formRef={form}
 							closeOuterModal={closeEditModal}
-							refreshState={getItems}
+							refreshState={() => clearCacheDelete(paginationIndex)}
 						/>
 					}
 					closeModal={closeEditModal}
@@ -369,7 +452,7 @@ export function MainApp() {
 				<Modal
 					open={modalOpen}
 					form={
-						<CreateItemForm refreshState={getItems} closeModal={closeModal} />
+						<CreateItemForm refreshState={() => clearCacheDelete(paginationIndex)} closeModal={closeModal} />
 					}
 					closeModal={closeModal}
 					title={"Create new item"}

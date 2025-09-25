@@ -155,3 +155,8 @@
 .confirmmodal button:nth-of-type(2){
     background-color: red;
 }
+
+.paginationbutton{
+    background-color: transparent;
+    border: solid 1px rgb(146, 146, 146);
+}
