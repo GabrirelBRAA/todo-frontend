@@ -110,7 +110,7 @@ function ConfirmDelete({
 	action,
 }: {
 	open: boolean;
-	close: MouseEventHandler;
+	close: (e: Event) => void;
 	action: MouseEventHandler;
 }) {
 	const dialog = useRef<HTMLDialogElement>(null);
@@ -142,7 +142,7 @@ function ConfirmDelete({
 		<dialog ref={dialog} className={styles.confirmmodal} open={open}>
 			<h2>Are you sure you want to delete this?</h2>
 			<button onClick={action}>Yes</button>
-			<button onClick={close}>No</button>
+			<button onClick={(e) => close(e.nativeEvent)}>No</button>
 		</dialog>
 	);
 }
@@ -181,7 +181,7 @@ function EditItemForm({
 	const [formErrors, setFormErrors] = useState<EditItemFormErrors>();
 	const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
 
-	const closeModal: MouseEventHandler = (e) => {
+	const closeModal = (e: Event) => {
 		e.preventDefault();
 		e.stopPropagation();
 		setOpenConfirmDelete(false);
