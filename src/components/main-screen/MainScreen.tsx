@@ -17,6 +17,58 @@ import { SpanError } from "../forms/spanerror";
 // list of users items
 // paginator component
 
+interface TagData{
+    id: string
+    color: string
+    name: string
+}
+
+//This is horryfing, a really sad state of affairs
+//This could be a usecase for a trie, sad
+function EditTagForm(){
+	return (
+		<form>
+            <input type="hidden" name="id"/>
+            <input type="search"/>
+            <select>
+                <option>data1</option>
+                <option>data2</option>
+            </select>
+            <div className="flex-thing">
+			<label className="taginput">
+                <span>TagName2</span>
+                <input type="hidden" name="tag-id" value={1}/>
+                <button>X</button>
+			</label>
+			<label className="taginput">
+                <span>TagName</span>
+                <input type="hidden" name="tag-id" value={2}/>
+			</label>
+            </div>
+			<button type="submit">Save</button>
+		</form>
+	);
+}
+
+//Here a function is passed to access editTagForm
+function TagList(){
+
+    const tagsDataList = [
+        {id: '1', color: "red", name: "tag1"},
+        {id: '1', color: "green", name: "tag1"},
+        {id: '1', color: "blue", name: "tag1"},
+    ]
+
+    const tags = tagsDataList.map(data => <Tag tagData={data}/>)
+    return <div className={styles.taglist}>
+        {tags}
+    </div>
+}
+
+function Tag({tagData}: {tagData: TagData}){
+    return <span className={styles.tag} style={{backgroundColor: tagData.color}}>{tagData.name}</span>
+}
+
 function Item({
 	item,
 	updateEditForm,
@@ -32,6 +84,7 @@ function Item({
 		<div onClick={handleClick} className={styles.item}>
 			<div className={styles.itemheader}>{item.title}</div>
 			<div>{item.description}</div>
+            <TagList/>
 		</div>
 	);
 }

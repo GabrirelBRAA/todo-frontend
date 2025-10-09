@@ -160,3 +160,16 @@
     background-color: transparent;
     border: solid 1px rgb(146, 146, 146);
 }
+
+.taglist{
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.tag{
+    border-radius: 50px;
+    padding: 2px 4px;
+    background-clip: border-box;
+    border: solid 1px rgba(255, 255, 255, 0.5);
+}
